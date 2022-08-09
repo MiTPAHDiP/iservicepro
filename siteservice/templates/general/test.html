@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Список</title>
+    </head>
+
+    <body>
+    <!-- put navigation menu just below here -->
+
+    <h1>Айфон</h1>
+
+    {% for item in iphone %}
+        <div>
+            <p>{{ item.serial_phone}}</p>
+            <p>{{ item.model_phone }}</p>
+            <p>{{ item.colors_phone }}</p>
+            <p>{{ item.memory_phone }}</p>
+            <p>{{ item.region_phone }}</p>
+            <p>{{ item.price_phone }} </p>
+
+
+        </div>
+        <hr>
+    {% endfor %}
+
+  </body>
+</html>
