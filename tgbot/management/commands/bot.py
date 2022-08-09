@@ -5,7 +5,7 @@ from telebot import apihelper, types  # Нужно для работы Proxy
 from iservicepro.settings import TOKEN, proxy
 from tgbot.models import Profile, Message
 from siteservice.models import Phone
-from siteservice import keyboard as kb
+from tgbot import keyboard as kb
 
 import urllib.request  # request нужен для загрузки файлов от пользователя
 
@@ -349,6 +349,9 @@ def callback_query(call):
     except Exception as e:
         bot.send_message(call.message.chat.id, 'Упс 🤧 что-то не работает ⚙️')
         print(repr(e))
+
+def start_bot():
+    bot.polling(none_stop=True, timeout=123, interval=2)
 
 
 class Command(BaseCommand):
