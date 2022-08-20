@@ -124,7 +124,7 @@ class Model_iMac(models.Model):
 
 
 class Phone(models.Model):
-    model_phone = models.ForeignKey(iPhone, verbose_name='Название', on_delete=models.CASCADE, null=True)
+    model_phone = models.ForeignKey(iPhone, verbose_name='Название', on_delete=models.PROTECT, null=True)
     memory_phone = models.ForeignKey(Memory, help_text='Выберите память', on_delete=models.PROTECT,
                                      verbose_name='Память')
     colors_phone = models.ForeignKey(AllColors, help_text="Выберите цвет", on_delete=models.PROTECT,

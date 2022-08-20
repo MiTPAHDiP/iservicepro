@@ -2,15 +2,15 @@ from django.core.management.base import BaseCommand
 import telebot
 from telebot import apihelper, types  # Нужно для работы Proxy
 
-from iservicepro.settings import TOKEN, proxy
+from django.conf import settings
 from tgbot.models import Profile, Message
 from siteservice.models import Phone
 from tgbot import keyboard as kb
 
 import urllib.request  # request нужен для загрузки файлов от пользователя
 
-bot = telebot.TeleBot(TOKEN)  # Передаём токен из файла config.py
-apihelper.proxy = {'http': proxy}  # Передаём Proxy из файла config.py
+bot = telebot.TeleBot(settings.TOKEN)  # Передаём токен из файла config.py
+apihelper.proxy = {'http': settings.proxy}  # Передаём Proxy из файла config.py
 
 print(bot.get_me())
 
@@ -42,7 +42,7 @@ def welcome_start(message):
         profile, _ = Profile.objects.get_or_create(external_id=chat_id, defaults={'name': message.from_user.first_name})
         user_id = Message(profile=profile)
         user_id.save()
-        #print('Логин добавлен')
+        # print('Логин добавлен')
         bot.send_message(message.chat.id, f'Приветствую вас {user_name}', reply_markup=kb.markup_menu)
 
     except Exception as m:
@@ -350,18 +350,22 @@ def callback_query(call):
         bot.send_message(call.message.chat.id, 'Упс 🤧 что-то не работает ⚙️')
         print(repr(e))
 
-def start_bot():
-    bot.polling(none_stop=True, timeout=123, interval=2)
+
+def main():
+    try:
+        bot.polling(none_stop=True, timeout=123, interval=2)
+    except Exception as e:
+        print(f'Error {e}')
 
 
 class Command(BaseCommand):
     help = 'Телеграм-бот'
+
     def handle(self, *args, **options):
         try:
             bot.polling(none_stop=True, timeout=123, interval=2)
         except Exception as e:
             print(f'Error {e}')
-
 
 # __gt для сравнений если больше
 # __ls если меньше
