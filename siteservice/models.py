@@ -1,7 +1,10 @@
 from datetime import datetime
 
 from django.db import models
-
+# import django
+# import os
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'iservicepro.settings'
+# django.setup()
 import uuid  # Required for unique book instances
 
 # Create your models here.
@@ -64,7 +67,7 @@ class Region(models.Model):
 
 # Навзание Mac OS
 class OperatingSystem(models.Model):
-    mac_os = models.CharField(max_length=200, help_text='Введите название Mac OS')
+    mac_os = models.CharField(max_length=200, help_text='Введите название Операционной системы')
 
     def __str__(self):
         return self.mac_os
@@ -88,7 +91,7 @@ class Memory(models.Model):
 
 # Навзание моделей айфон
 class iPhone(models.Model):
-    iphone_name = models.CharField(max_length=150, db_index=True, verbose_name='Название моделей iPhone')
+    iphone_name = models.CharField(max_length=150, db_index=True, verbose_name='Названия моделей iPhone')
 
     def __str__(self):
         return self.iphone_name
@@ -101,17 +104,17 @@ class iPhone(models.Model):
 
 # Навзание моделей айфон
 class MacBook(models.Model):
-    macbook_name = models.CharField(max_length=150, db_index=True, verbose_name='Название моделей MacBook')
+    macbook_name = models.CharField(max_length=150, db_index=True, verbose_name='Модель MacBook')
 
     def __str__(self):
         return self.macbook_name
 
     class Meta:
-        verbose_name = ' Модели MacBook'
-        verbose_name_plural = ' Модели MacBook'
+        verbose_name = 'MacBook'
+        verbose_name_plural = 'MacBook'
 
 
-# Навзание моделей айфон
+# Навзания моделей iMac
 class Model_iMac(models.Model):
     imac_model = models.CharField(max_length=150, db_index=True)
 
@@ -124,8 +127,8 @@ class Model_iMac(models.Model):
 
 
 class Phone(models.Model):
-    model_phone = models.ForeignKey(iPhone, verbose_name='Название', on_delete=models.PROTECT, null=True)
-    memory_phone = models.ForeignKey(Memory, help_text='Выберите память', on_delete=models.PROTECT,
+    model_phone = models.ForeignKey(to=iPhone, verbose_name='Название', on_delete=models.PROTECT, null=True)
+    memory_phone = models.ForeignKey(to=Memory, help_text='Выберите память', on_delete=models.PROTECT,
                                      verbose_name='Память')
     colors_phone = models.ForeignKey(AllColors, help_text="Выберите цвет", on_delete=models.PROTECT,
                                      verbose_name='Цвет')
@@ -139,7 +142,7 @@ class Phone(models.Model):
 
     # def get_absolute_url(self):
     #     """
-    #     Возвращает URL-адрес для доступа к конкретному экземпляру автора.
+    #     Возвращает URL-адрес для доступа к конкретному экземпляру.
     #     """
     #     return reverse('iphone-detail', args=[str(self.id)])
 
@@ -150,8 +153,8 @@ class Phone(models.Model):
         return f'{self.model_phone} {self.memory_phone} {self.colors_phone} {self.region_phone} {self.price_phone}'
 
     class Meta:
-        verbose_name = 'Новые iPhone'
-        verbose_name_plural = 'Новые iPhone'
+        verbose_name = 'Новые Телефоны'
+        verbose_name_plural = 'Новые  Телефоны'
         ordering = ['-created_at']
 
 
@@ -208,12 +211,12 @@ class UsedPhones(models.Model):
 
 class NewMacBook(models.Model):
     macbook_model = models.ForeignKey(MacBook, on_delete=models.CASCADE, max_length=150, null=True,
-                                     verbose_name='Модель')
+                                      verbose_name='Модель')
     years_macbook = models.CharField(max_length=100, null=True, verbose_name='Год')
     mac_color = models.ForeignKey(AllColors, on_delete=models.CASCADE, help_text="Выберите цвет",
-                                    verbose_name='Цвет')
+                                  verbose_name='Цвет')
     mac_memory = models.ForeignKey(Memory, on_delete=models.CASCADE, help_text='Выберите память',
-                                    verbose_name='Память')
+                                   verbose_name='Память')
     mac_region = models.ForeignKey(Region, on_delete=models.CASCADE, max_length=100, null=True, verbose_name='Страна')
     operating_system = models.ForeignKey(OperatingSystem, on_delete=models.CASCADE, max_length=250, null=True,
                                          verbose_name='Оперционная система')
@@ -258,4 +261,4 @@ class NewMacBook(models.Model):
 # return ", ".join([Region.region_name for Region in self.region_phone.all()])
 # get_region.short_description = 'Регион'
 # python3 manage.py shell_plus --print-sql
-#urls.py
+# urls.py

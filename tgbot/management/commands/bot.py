@@ -1,18 +1,22 @@
 from django.core.management.base import BaseCommand
 import telebot
 from telebot import apihelper, types  # Нужно для работы Proxy
-
 from django.conf import settings
-from tgbot.models import Profile, Message
+
 from siteservice.models import Phone
 from tgbot import keyboard as kb
-
+import environ
 import urllib.request  # request нужен для загрузки файлов от пользователя
+from tgbot.models import Profile, Message
 
-bot = telebot.TeleBot(settings.TOKEN)  # Передаём токен из файла config.py
-apihelper.proxy = {'http': settings.proxy}  # Передаём Proxy из файла config.py
+env = environ.Env()
+environ.Env.read_env()
 
-print(bot.get_me())
+bot = telebot.TeleBot(settings.TOKEN)  # Передаём токен из файла setting.py
+#apihelper.proxy = {'http': settings.proxy}  # Передаём Proxy из файла config.py
+# Initialise environment variables
+
+print('Start Bot')
 
 user_repear = ['ремонт', 'починить', 'отремонтировать', 'почистить', 'замена', 'заменить']
 user_buy = ['покупка', 'купить', 'покупать']
@@ -37,13 +41,28 @@ def log_errors(f):
 def welcome_start(message):
     user_name = message.from_user.first_name
     chat_id = message.chat.id
+    send_mess = f'Приветсвую Вас {user_name}!' \
+                "\nДанный бот создан с целью сэкономить Свое и ваше время на телефонные разговоры.\n" \
+                "\n" \
+                "Тут вы можете:\n" \
+                "Узнать стоимость ремонта.\n" \
+                "Узнать стоимость новых и б\у телефонов.\n" \
+                "Оставить заявку на ремонт, чтобы Мы связались с вами\n" \
+                "\n" \
+                "\n" \
+                "Так же вы сможете подписаться на новостные рассылки.\n" \
+                "Но это не обязательно! " \
+                "Если все же вы не нашли то, что вам нужно! Пишите\n" \
+                "\n" \
+                "@leaderisaev \n"
+
     try:
         # Добавляем пользователя после запуска бота
         profile, _ = Profile.objects.get_or_create(external_id=chat_id, defaults={'name': message.from_user.first_name})
         user_id = Message(profile=profile)
         user_id.save()
         # print('Логин добавлен')
-        bot.send_message(message.chat.id, f'Приветствую вас {user_name}', reply_markup=kb.markup_menu)
+        bot.send_message(message.chat.id, send_mess, reply_markup=kb.markup_menu)
 
     except Exception as m:
         error_message = f'Произошла ошибка: {m}'
