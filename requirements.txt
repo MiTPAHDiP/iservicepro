@@ -78,7 +78,6 @@ watchdog==2.1.6
 wcwidth==0.2.5
 whitenoise==6.2.0
 yarl==1.7.2
-(env) leader@Leader1s-MacBook-Pro iservicepro % pip freeze
 aiohttp==3.8.1
 aiosignal==1.2.0
 appnope==0.1.3
