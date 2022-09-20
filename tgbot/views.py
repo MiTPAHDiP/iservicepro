@@ -1,7 +1,8 @@
-import os
 from tgbot.management.commands import bot
+from django.shortcuts import render
 
 
-def ready(self) -> None:
-    if os.environ.get('RUN_MAIN', None) != 'true':
-        bot.main()
+
+def start_bot(request):
+    bot.main()
+    return render(request, 'bot.py')

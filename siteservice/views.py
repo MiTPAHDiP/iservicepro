@@ -6,7 +6,7 @@ from .models import iPhone
 
 
 def index(request):
-    iphone = iPhone.objects.all()
+    iphone = iPhone.objects.all()[:20]
     return render(request, 'general/index.html', {'iphone': iphone})
     #return render(request, 'news/index.html', {'news': news, 'title': 'Список новостей'})
 

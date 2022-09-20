@@ -242,8 +242,8 @@ class NewMacBook(models.Model):
                f'{self.created_at}'
 
     class Meta:
-        verbose_name = 'MacBook'
-        verbose_name_plural = 'MacBook'
+        verbose_name = 'Новые MacBook'
+        verbose_name_plural = 'Новые MacBook'
         ordering = ['-macbook_model']
 
     '''def save(self, *args, **kwargs):

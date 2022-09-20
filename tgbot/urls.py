@@ -1,13 +1,16 @@
 from django.urls import path, include
-import tgbot
-from tgbot.management.commands import bot
 
-from tgbot.views import ready
+from tgbot.views import start_bot
+
 
 urlpatterns = [
-    path('', ready),
+    path('', start_bot),
+    #path('', include('tgbot.urls')),
 
 ]
+
+
+
 
 
 

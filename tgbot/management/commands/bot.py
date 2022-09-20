@@ -1,8 +1,10 @@
 from django.core.management.base import BaseCommand
 import telebot
-from telebot import apihelper, types  # Нужно для работы Proxy
+from telebot import apihelper, types, StateMemoryStorage  # Нужно для работы Proxy
 from django.conf import settings
-
+import re
+from telebot import custom_filters
+from telebot.handler_backends import StatesGroup, State
 from siteservice.models import Phone
 from tgbot import keyboard as kb
 import environ
@@ -11,17 +13,25 @@ from tgbot.models import Profile, Message
 
 env = environ.Env()
 environ.Env.read_env()
-
-bot = telebot.TeleBot(settings.TOKEN)  # Передаём токен из файла setting.py
-#apihelper.proxy = {'http': settings.proxy}  # Передаём Proxy из файла config.py
+state_storage = StateMemoryStorage()
+bot = telebot.TeleBot(settings.TOKEN, state_storage=state_storage)  # Передаём токен из файла setting.py
+# apihelper.proxy = {'http': settings.proxy}  # Передаём Proxy из файла config.py
 # Initialise environment variables
 
-print('Start Bot')
+print('Start BOT')
 
 user_repear = ['ремонт', 'починить', 'отремонтировать', 'почистить', 'замена', 'заменить']
 user_buy = ['покупка', 'купить', 'покупать']
 user_sale = ['продать', 'продажа', 'продаю', 'продавать']
 user_other = ['другое']
+admin = env('admin_commands')
+
+
+# States group.
+class MyStates(StatesGroup):
+    # Just name variables differently
+    price = State()  # с этого момента достаточно создавать экземпляры класса State
+    end = State()
 
 
 def log_errors(f):
@@ -55,8 +65,8 @@ def welcome_start(message):
                 "Если все же вы не нашли то, что вам нужно! Пишите\n" \
                 "\n" \
                 "@leaderisaev \n"
-
     try:
+
         # Добавляем пользователя после запуска бота
         profile, _ = Profile.objects.get_or_create(external_id=chat_id, defaults={'name': message.from_user.first_name})
         user_id = Message(profile=profile)
@@ -70,37 +80,92 @@ def welcome_start(message):
         raise m
 
 
-# Тут улавливает тексты пользователей
-@bot.message_handler(content_types=["text"])
-def text(message):
-    chat_id = message.chat.id
-    text_user = message.text.lower()
-    if text_user in user_buy:
-        bot.send_message(chat_id, text="Прайc на Apple", reply_markup=kb.inline_kb_sale_menu)
+def update_price(message):
+    bot.set_state(message.from_user.id, MyStates.price, message.chat.id)
+    bot.send_message(message.chat.id, 'Напишите прайс')
 
-    elif text_user in user_repear:
-        bot.send_message(chat_id, text='Я так понимаю вас интересует ремонт, мы работаем над этим')
 
-    elif text_user in user_sale:
-        bot.send_message(chat_id, text='Я так понимаю вы хотите что-то продать, мы работаем над этим')
+@bot.message_handler(state=MyStates.price)
+def name_get(message):
+    bot.set_state(message.from_user.id, message.chat.id)
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['price'] = message.text
+        write_data(data['price'])
+    bot.delete_state(message.from_user.id, message.chat.id)
+    bot.send_message(message.chat.id, 'Отправлено')
+    # msg = ("Все верно?:\n<b>"
+    #        f"{data['price']}\n</b>")
+    # bot.send_message(message.chat.id, msg, parse_mode="html")
 
-    elif text_user in user_other:
-        bot.send_message(chat_id, text='Если не нашли то, что вам нужно вы можете написать:\n @leaderisaev')
 
-    else:
-        bot.send_message(chat_id, text='А вот это мне не знакомо, пожалуй запомню ☺️')
-        try:
-            # Передаем текст пользователя в бд
-            user_name, _ = Profile.objects.get_or_create(external_id=chat_id,
-                                                         defaults={'name': message.from_user.first_name})
-            user_message = Message(profile=user_name, text=text_user)
-            user_message.save()
-            print(message.text)
-        # Улавливаем ошибки
-        except Exception as m:
-            error_message = f'Произошла ошибка: {m}'
-            print(error_message)
-            raise m
+def write_data(data, filename='price.txt'):
+    with open(filename, "w+") as f:
+        f.write(data + '\n')
+        return create_price()
+
+
+def create_price():
+    with open('price.txt', 'r+') as f:
+        file = f.readlines()
+        for line in file:
+            t = re.sub('[.,-]', ' ', line)
+            phone_data = t.split()
+            print(phone_data)
+            if len(phone_data) >= 7:
+                model = ' '.join(phone_data[:3])
+                memory = phone_data[3]
+                color = phone_data[4]
+                price = int(phone_data[6])
+                region = phone_data[5][-2:]
+                print(model, memory, color)
+                try:
+                    date, _ = Phone.objects.update_or_create()
+                    date.save()
+                    print(model, memory, color, region, price)
+                except Exception as m:
+                    error_message = f'Произошла ошибка: {m}'
+                    print(error_message)
+                    raise m
+            elif len(phone_data) == 6:
+                try:
+                    model = ' '.join(phone_data[:2])
+                    memory = phone_data[2]
+                    color = phone_data[3]
+                    price = int(phone_data[5])
+                    region = phone_data[4][-2:]
+                    date, _ = Phone.objects.update(model_phone=model,
+                                                   memory_phone=memory,
+                                                   colors_phone=color,
+                                                   region_phone=region,
+                                                   price_phone=price)
+                    date.save()
+                except Exception as m:
+                    error_message = f'Произошла ошибка: {m}'
+                    print(error_message)
+                    raise m
+            elif len(phone_data) == 5:
+                try:
+                    model = ' '.join(phone_data[:1])
+                    memory = phone_data[1]
+                    color = phone_data[2]
+                    price = int(phone_data[4])
+                    region = phone_data[3][-2:]
+                    date, _ = Phone.objects.update(model_phone=model,
+                                                   memory_phone=memory,
+                                                   colors_phone=color,
+                                                   region_phone=region,
+                                                   price_phone=price)
+                    date.save()
+                except Exception as m:
+                    error_message = f'Произошла ошибка: {m}'
+                    print(error_message)
+                    raise m
+
+
+# def send_info(message, data):
+#     user_name = message.from_user.first_name
+#     chat_id = message.chat.id
+#     bot.send_message(message.chat.id, f"{data}\n</b>", parse_mode="html",reply_markup=kb.btn_add_price)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -110,10 +175,63 @@ def callback_query(call):
             if call.data == 'sale_new_iphone':
                 bot.send_message(call.message.chat.id, text="iPhone",
                                  reply_markup=kb.inline_kb_chose_new_model_iphone)
+            elif call.data == 'sale_iphone14':
+                try:
+                    model = Phone.objects.filter(model_phone__iphone_name=f'14')
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
+                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
+                    else:
+                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                        for item in model:
+                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+                except Phone.DoesNotExist as s:
+                    print(s)
+
+            elif call.data == 'sale_iphone14max':
+                try:
+                    model = Phone.objects.filter(model_phone__iphone_name=f'14 Max')
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
+                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
+                    else:
+                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                        for item in model:
+                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+                except Phone.DoesNotExist as s:
+                    print(s)
+
+            elif call.data == 'sale_iphone14pro':
+                try:
+                    model = Phone.objects.filter(model_phone__iphone_name=f'14 Pro')
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
+                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
+                    else:
+                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                        for item in model:
+                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+                except Phone.DoesNotExist as s:
+                    print(s)
+
+            elif call.data == 'sale_iphone14promax':
+                try:
+                    model = Phone.objects.filter(model_phone__iphone_name=f'14 Pro Max')
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
+                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
+                    else:
+                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                        for item in model:
+                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+                except Phone.DoesNotExist as s:
+                    print(s)
+
             elif call.data == 'sale_iphone13':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name=f'13')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -125,7 +243,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone13pro':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='13 Pro')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -137,7 +256,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone13promax':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='13 Pro Max')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -146,11 +266,11 @@ def callback_query(call):
                 except Phone.DoesNotExist as s:
                     print(s)
 
-
             elif call.data == 'sale_iphone13mini':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='13 Mini')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -162,7 +282,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_12promax':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='12 Pro Max')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -174,7 +295,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_12pro':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='12 Pro')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -186,7 +308,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_12':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='12')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -198,7 +321,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_12mini':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='12 Mini')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -210,7 +334,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_se2':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='SE (2-го поколения)')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -222,7 +347,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_11pro':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='11 Pro')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -234,7 +360,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_11promax':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='11 Pro Max')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -246,7 +373,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_11':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='11')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -258,7 +386,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_xs':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='XS')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -270,7 +399,8 @@ def callback_query(call):
             elif call.data == 'iPhone_xsmax':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='XS Max')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -282,7 +412,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_xr':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='XR')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -294,7 +425,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_x':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='X')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -306,7 +438,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_8':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='8')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -318,7 +451,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_8plus':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='8 Plus')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -330,7 +464,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_7':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='7')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -342,7 +477,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_7plus':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='7 Plus')
-                    if not model:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -354,7 +490,8 @@ def callback_query(call):
             elif call.data == 'sale_iphone_se1':
                 try:
                     model = Phone.objects.filter(model_phone__iphone_name='SE (1-го поколения)')
-                    if Phone.status[0]:
+                    status = Phone.objects.filter(status='n')
+                    if not model or status:
                         bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет')
                     else:
                         bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -364,27 +501,64 @@ def callback_query(call):
                     print(s)
             else:
                 bot.send_message(call.message.chat.id, 'Мы работаем над этим 🤧')
-
     except Exception as e:
         bot.send_message(call.message.chat.id, 'Упс 🤧 что-то не работает ⚙️')
         print(repr(e))
 
 
+# Тут улавливает тексты пользователей
+@bot.message_handler(content_types=['text'])
+def text_user(message):
+    chat_id = message.chat.id
+    text_user = message.text.lower()
+    if text_user in admin and chat_id == 113129447:
+        update_price(message)
+    elif text_user in user_buy:
+        bot.send_message(chat_id, text="Прайc на Apple", reply_markup=kb.inline_kb_sale_menu)
+    elif text_user in user_repear:
+        bot.send_message(chat_id,
+                         text='Я так понимаю вас интересует ремонт, мы работаем над этим')
+    elif text_user in user_sale:
+        bot.send_message(chat_id,
+                         text='Я так понимаю вы хотите что-то продать, мы работаем над этим')
+    elif text_user in user_other:
+        bot.send_message(chat_id,
+                         text='Если не нашли то, что вам нужно вы можете написать:\n @leaderisaev')
+    else:
+        bot.send_message(chat_id,
+                         text='А вот это мне не знакомо, пожалуй запомню ☺️')
+        if not message.chat.id == 113129447:
+            try:
+                user_name, _ = Profile.objects.get_or_create(external_id=chat_id,
+                                                             defaults={'name': message.from_user.first_name})
+                user_message = Message(profile=user_name, text=text_user)
+                user_message.save()
+                print(text_user)
+            except Exception as m:
+                error_message = f'Произошла ошибка: {m}'
+                print(error_message)
+                raise m
+
+
 def main():
     try:
-        bot.polling(none_stop=True, timeout=123, interval=2)
+        bot.enable_save_next_step_handlers(delay=2)  # Сохранение обработчиков
+        bot.load_next_step_handlers()  # Загрузка обработчиков
+        bot.infinity_polling()
     except Exception as e:
         print(f'Error {e}')
+
+
+bot.add_custom_filter(custom_filters.StateFilter(bot))
 
 
 class Command(BaseCommand):
     help = 'Телеграм-бот'
 
     def handle(self, *args, **options):
-        try:
-            bot.polling(none_stop=True, timeout=123, interval=2)
-        except Exception as e:
-            print(f'Error {e}')
+        bot.enable_save_next_step_handlers(delay=2)  # Сохранение обработчиков
+        bot.load_next_step_handlers()  # Загрузка обработчиков
+        bot.infinity_polling()
 
 # __gt для сравнений если больше
 # __ls если меньше

@@ -13,6 +13,9 @@ button4 = KeyboardButton('Другое')
 markup_menu = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 markup_menu.add(button1, button2, button3, button4)
 
+btn_add_price = KeyboardButton('Обновить')
+add_price_btn = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_add_price)
+
 """Инлайн кнопки для меню покупки тел"""
 inline_btn_iphone = InlineKeyboardButton('iPhone', callback_data='sale_new_iphone')
 inline_btn_ipad = InlineKeyboardButton('iPad', callback_data='sale_new_ipad')
@@ -32,6 +35,10 @@ inline_kb_sale_menu = InlineKeyboardMarkup(row_width=2).add(inline_btn_iphone, i
                                                             inline_btn_macsafe, inline_btn_20w)
 
 """Инлайн кнопки для меню покупки тел"""
+inline_iphone_14 = InlineKeyboardButton('iPhone 14', callback_data='sale_iphone14')
+inline_iphone_14max = InlineKeyboardButton('iPhone 14 Max', callback_data='sale_iphone14max')
+inline_iphone_14pro = InlineKeyboardButton('iPhone 14 Pro', callback_data='sale_iphone14pro')
+inline_iphone_14promax = InlineKeyboardButton('iPhone 14 Pro Max', callback_data='sale_iphone14promax')
 inline_iphone_13 = InlineKeyboardButton('iPhone 13', callback_data='sale_iphone13')
 inline_iphone_13pro = InlineKeyboardButton('iPhone 13 Pro', callback_data='sale_iphone13pro')
 inline_iphone_13promax = InlineKeyboardButton('iPhone 13 Pro Max', callback_data='sale_iphone13promax')
@@ -59,16 +66,18 @@ inline_iphone_7plus = InlineKeyboardButton('iPhone 7 Plus', callback_data='sale_
 # inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
 # inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
 # inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-inline_kb_chose_new_model_iphone = InlineKeyboardMarkup(row_width=2).add(inline_iphone_13, inline_iphone_13pro,
+inline_kb_chose_new_model_iphone = InlineKeyboardMarkup(row_width=2).add(inline_iphone_14, inline_iphone_14max,
+                                                                         inline_iphone_14pro, inline_iphone_14promax,
+                                                                         inline_iphone_13, inline_iphone_13pro,
                                                                          inline_iphone_13promax, inline_iphone_13mini,
                                                                          inline_iphone_12, inline_iphone_12pro,
                                                                          inline_iphone_12promax, inline_iphone_12mini,
                                                                          inline_iphone_11, inline_iphone_11,
-                                                                         inline_iphone_11pro,inline_iphone_se2,
+                                                                         inline_iphone_11pro, inline_iphone_se2,
                                                                          inline_iphone_11promax,
-                                                                         inline_iphone_xs,inline_iphone_se1,
-                                                                         inline_iphone_xr,inline_iphone_x,
-                                                                         inline_iphone_8,inline_iphone_8plus,
+                                                                         inline_iphone_xs, inline_iphone_se1,
+                                                                         inline_iphone_xr, inline_iphone_x,
+                                                                         inline_iphone_8, inline_iphone_8plus,
                                                                          inline_iphone_7, inline_iphone_7plus)
 
 '''model_from_phone = iPhone.objects.all()
