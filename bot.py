@@ -1,14 +1,21 @@
-from django.core.management.base import BaseCommand
+# from django.core.management.base import BaseCommand
+import os
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "iservicepro.settings")
+import django
+
+django.setup()
 import telebot
 from telebot import apihelper, types, StateMemoryStorage  # Нужно для работы Proxy
-from django.conf import settings
 import re
 from telebot import custom_filters
 from telebot.handler_backends import StatesGroup, State
+
+from iservicepro import settings
 from siteservice.models import Phone
 from tgbot import keyboard as kb
 import environ
-import urllib.request  # request нужен для загрузки файлов от пользователя
+# import urllib.request  # request нужен для загрузки файлов от пользователя
 from tgbot.models import Profile, Message
 from datetime import date, datetime
 
@@ -100,18 +107,15 @@ def name_get(message):
     # bot.send_message(message.chat.id, msg, parse_mode="html")
 
 
-def write_data(data, filename='price.txt'):
+def write_data(data, filename='price.txt', ):
+    current_date_time = datetime.today()
     with open(filename, "w+") as f:
-        f.write(f'{data}\n')
+        f.write(f'{current_date_time}\n{data}\n')
         f.close()
-    create_price()
 
 
-# def send_ok_mes(message):
-#     text_user = message.text.lower()
-#     bot.send_message(message.chat.id, 'Записать?')
-#     if text_user == 'Да':
-#         create_price
+def send_ok_mes(message):
+    bot.send_message(message.chat.id, 'Записать?')
 
 
 def create_price():
@@ -126,62 +130,21 @@ def create_price():
                 color = phone_data[4]
                 price = int(phone_data[6])
                 region = phone_data[5][-2:]
-                # print(model, memory, color, price, region)
-                try:
-                    obj, created = Phone.objects.update_or_create(
-                        model_phone__iphone_name=model,
-                        memory_phone__memory_info=memory,
-                        colors_phone__colors_name=color,
-                        region_phone__region_name=region,
-                        price_phone=price)
-                    # obj = Phone(**created)
-                    obj.save()
-                except Phone.DoesNotExist as m:
-                    error_message = f'Произошла ошибка: {m}'
-                    print(error_message)
-                    raise m
-            # data = {'model_phone': model,
-            #         'memory_phone': memory,
-            #         'colors_phone' : color,
-            #         'region_phone' : region,
-            #         'price_phone' : price}
+                print(model, memory, color, price, region)
             elif len(phone_data) == 6:
                 model = ' '.join(phone_data[:2])
                 memory = phone_data[2]
                 color = phone_data[3]
                 price = int(phone_data[5])
                 region = phone_data[4][-2:]
-                try:
-                    obj, created = Phone.objects.update_or_create(
-                        model_phone__iphone_name=model,
-                        memory_phone__memory_info=memory,
-                        colors_phone__colors_name=color,
-                        region_phone__region_name=region,
-                        price_phone=price)
-                    # obj = Phone(**created)
-                    obj.save()
-                except Phone.DoesNotExist as m:
-                    error_message = f'Произошла ошибка: {m}'
-                    print(error_message)
-                    raise m
-
-            # elif len(phone_data) == 5:
-            #     model = ' '.join(phone_data[:1])
-            #     memory = phone_data[1]
-            #     color = phone_data[2]
-            #     price = int(phone_data[4])
-            #     region = phone_data[3][-2:]
-            #     print(model, memory, color, price, region)
-
-    # лучше bulk_create - множественоое создание. но это не критично
-    # Data.object.create(
-    #     model=model,
-    #     memory=memory,
-    #     color=color,
-    #     price=price,
-    #     # тут смайлики, создай dict в котором ключи со смайликами будут ассоцироваться с корректным названием страны
-    #     region=region,
-    # )
+                print(model, memory, color, price, region)
+            elif len(phone_data) == 5:
+                model = ' '.join(phone_data[:1])
+                memory = phone_data[1]
+                color = phone_data[2]
+                price = int(phone_data[4])
+                region = phone_data[3][-2:]
+                print(model, memory, color, price, region)
 
 
 # def send_info(message, data):
@@ -555,6 +518,7 @@ def text_user(message):
                                                              defaults={'name': message.from_user.first_name})
                 user_message = Message(profile=user_name, text=text_user)
                 user_message.save()
+                print(text_user)
             except Exception as m:
                 error_message = f'Произошла ошибка: {m}'
                 print(error_message)
@@ -566,20 +530,23 @@ def main():
         start = bot.polling(none_stop=True, timeout=123, interval=1)
     except Exception as e:
         print(f'Error {e}')
-    return start
+    return
 
+
+if __name__ == '__main__':
+    main()
 
 bot.add_custom_filter(custom_filters.StateFilter(bot))
 
-
-class Command(BaseCommand):
-    help = 'Телеграм-бот'
-
-    def handle(self, *args, **options):
-        try:
-            bot.polling(none_stop=True, timeout=123, interval=1)
-        except Exception as e:
-            print(f'Error {e}')
+#
+# class Command(BaseCommand):
+#     help = 'Телеграм-бот'
+#
+#     def handle(self, *args, **options):
+#         try:
+#             bot.polling(none_stop=True, timeout=123, interval=1)
+#         except Exception as e:
+#             print(f'Error {e}')
 
 # __gt для сравнений если больше
 # __ls если меньше

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Форум</title>
+    <style>
+        body{
+        display: flex;
+        justify-content: center;
+        align-item: center;
+        height: 100vh;
+        }
+        .form{
+        width: 300px;
+        height: 250px;
+        padding: 32px;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px #ccc;
+        font-family: sans-serif;
+        letter-spacing: 1px;
+        }
+        .form_input,
+        .form_button{
+        font-family: sans-serif;
+        letter-spacing: 1px;
+        font-size: 19px;
+        }
+        .form_title{
+        text-align: center;
+        margin: 0 0 32px 0;
+        font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+<form action="" class="form">
+    <h1 class="form_title">Вход</h1>
+    <div class="form_group">
+        <input type="text" class="form_input">
+        <label for="email">Email</label>
+    </div>
+    <div class="form_group">
+        <input type="text" class="form_input">
+        <label for="passw">Password</label>
+    </div>
+    <button type="submit" class="registerbtn">Войти</button>
+
+</form>
+
+</body>
+</html>

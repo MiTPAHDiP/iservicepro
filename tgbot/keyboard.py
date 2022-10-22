@@ -4,7 +4,7 @@ from telebot.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardBut
 from siteservice import models
 
 # btn_folower = KeyboardButton('Подписка')
-from siteservice.models import iPhone
+from siteservice.models import Phone
 
 button1 = KeyboardButton('Ремонт ')
 button2 = KeyboardButton('Покупка')

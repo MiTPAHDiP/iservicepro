@@ -1,11 +1,8 @@
 from datetime import datetime
 
 from django.db import models
-# import django
-# import os
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'iservicepro.settings'
-# django.setup()
-import uuid  # Required for unique book instances
+
+# import uuid  # Required for unique book instances
 
 # Create your models here.
 from django.urls import reverse
@@ -20,16 +17,16 @@ STATUS_CHOICES = [
 
 # БД всех цветов
 class AllColors(models.Model):
-    '''Эта модель используется для хранения информации о категории цветах'''
-    colors_name = models.CharField(max_length=200,
-                                   help_text="Введите цвет на англ.",
-                                   verbose_name='Название цвета')
+    '''Эта модель используется для хранения информации о цветах'''
+    colors = models.CharField(max_length=200,
+                              help_text="Введите цвет на англ.",
+                              verbose_name='Название цвета')
 
     def __str__(self):
         """
         Строка для представления объекта модели (на сайте администратора и т. д.)
         """
-        return self.colors_name
+        return self.colors
 
     # def display_color(self):
     #     """
@@ -46,16 +43,16 @@ class AllColors(models.Model):
 
 # Название стран
 class Region(models.Model):
-    region_name = models.CharField(max_length=100, null=True, verbose_name='Название Региона')
+    regions = models.CharField(max_length=100, verbose_name='Название Региона')
 
     def __str__(self):
         """
         Строка для представления объекта модели (на сайте администратора и т. д.)
         """
-        return self.region_name
+        return self.regions
 
     class Meta():
-        verbose_name = 'Регионы'
+        verbose_name = 'Регион'
         verbose_name_plural = 'Регионы'
 
     # def get_region(self):
@@ -79,10 +76,10 @@ class OperatingSystem(models.Model):
 
 # флеш память
 class Memory(models.Model):
-    memory_info = models.CharField(max_length=100, help_text='Введите память в формате ...гб')
+    memory = models.CharField(max_length=100, help_text='Введите память в формате ...гб')
 
     def __str__(self):
-        return self.memory_info
+        return self.memory
 
     class Meta:
         verbose_name = 'Объем памяти'
@@ -90,21 +87,22 @@ class Memory(models.Model):
 
 
 # Навзание моделей айфон
-class iPhone(models.Model):
-    iphone_name = models.CharField(max_length=150, db_index=True, verbose_name='Названия моделей iPhone')
+class Phone(models.Model):
+    phone_name = models.CharField(max_length=150, verbose_name='Названия моделей iPhone')
 
     def __str__(self):
-        return self.iphone_name
+        return 'iPhone %s' % (self.phone_name)
+        # return self.phone_name
 
     class Meta:
         verbose_name = 'iPhone'
         verbose_name_plural = 'iPhone'
-        ordering = ['iphone_name']
+        ordering = ['phone_name']
 
 
 # Навзание моделей айфон
 class MacBook(models.Model):
-    macbook_name = models.CharField(max_length=150, db_index=True, verbose_name='Модель MacBook')
+    macbook_name = models.CharField(max_length=150, verbose_name='Модель MacBook')
 
     def __str__(self):
         return self.macbook_name
@@ -126,19 +124,30 @@ class Model_iMac(models.Model):
         verbose_name_plural = 'iMac'
 
 
-class Phone(models.Model):
-    model_phone = models.ForeignKey(to=iPhone, verbose_name='Название', on_delete=models.PROTECT, null=True)
-    memory_phone = models.ForeignKey(to=Memory, help_text='Выберите память', on_delete=models.PROTECT,
-                                     verbose_name='Память')
-    colors_phone = models.ForeignKey(AllColors, help_text="Выберите цвет", on_delete=models.PROTECT,
-                                     verbose_name='Цвет')
-    region_phone = models.ForeignKey(Region, on_delete=models.PROTECT, verbose_name='Регион')
+class NewiPhone(models.Model):
+    model_phone = models.ForeignKey(to=Phone, on_delete=models.CASCADE, help_text='Выберите модель',
+                                    verbose_name='Модель')
+    memory_phone = models.ManyToManyField(Memory, help_text="Выберите память",
+                                          verbose_name='Память', related_name='n')
+    colors_phone = models.ManyToManyField(AllColors, help_text="Выберите цвет",
+                                          verbose_name='Цвет')
+    region_phone = models.ManyToManyField(Region, help_text="Выберите регион",
+                                          verbose_name='Регион')
     price_phone = models.IntegerField(verbose_name='Стоимость')
     photo_phone = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, verbose_name='Фото файлы')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     update_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='В наличии')
     new_or_used = models.BooleanField(default=True, verbose_name='Новый')
+
+    def get_memory(self):
+        return "\n".join([p.memory for p in self.memory_phone.all()])
+
+    def get_colors(self):
+        return "\n".join([p.colors for p in self.colors_phone.all()])
+
+    def get_region(self):
+        return "\n".join([p.memory for p in self.memory_phone.all()])
 
     # def get_absolute_url(self):
     #     """
@@ -150,24 +159,27 @@ class Phone(models.Model):
         """
         Строка для представления объекта Model.
         """
-        return f'{self.model_phone} {self.memory_phone} {self.colors_phone} {self.region_phone} {self.price_phone}'
+        return f'{self.model_phone}' \
+               f'{self.memory_phone} ' \
+               f'{self.colors_phone}' \
+               f'{self.region_phone}' \
+               f'{self.price_phone}'
 
     class Meta:
-        verbose_name = 'Новые Телефоны'
-        verbose_name_plural = 'Новые  Телефоны'
-        ordering = ['-created_at']
+        verbose_name = 'Новый iPhone'
+        verbose_name_plural = 'Новые iPhone'
 
 
 # Модель БД iMac
-class iMac(models.Model):
-    imac_serial = models.ForeignKey(Model_iMac, on_delete=models.CASCADE)
+class Imac(models.Model):
+    model_imac = models.ForeignKey(Model_iMac, on_delete=models.CASCADE)
     years_imac = models.CharField(max_length=100)
-    imac_color = models.ForeignKey(AllColors, on_delete=models.PROTECT, help_text="Выберите цвет")
-    imac_memory = models.ForeignKey(Memory, on_delete=models.PROTECT, help_text='Выберите память')
-    imac_region = models.CharField(Region, max_length=150, null=True)
+    imac_color = models.ManyToManyField(AllColors, help_text="Выберите цвет")
+    imac_memory = models.ManyToManyField(Memory, help_text='Выберите память')
+    imac_region = models.ManyToManyField(Region, max_length=150)
     model_id = models.CharField(max_length=155)
     articles = models.CharField(max_length=155)
-    operating_system = models.ForeignKey(OperatingSystem, on_delete=models.CASCADE, max_length=250)
+    operating_system = models.ManyToManyField(OperatingSystem, max_length=250)
     photo_phone = models.ImageField(upload_to='photos_imac/%Y/%m/%d', blank=True)
     diagonal = models.CharField(max_length=150, null=True)
     description = models.CharField(max_length=255, null=True, blank=True)
@@ -176,19 +188,19 @@ class iMac(models.Model):
     availability_phone = models.BooleanField(default=True, choices=STATUS_CHOICES, verbose_name='В наличии')
 
     def __str__(self):
-        return self.imac_serial
+        return self.model_imac
 
     class Meta:
         verbose_name = 'iMac'
         verbose_name_plural = 'iMac'
-        ordering = ['-imac_serial']
+        ordering = ['-model_imac']
 
 
-class UsedPhones(models.Model):
-    iphone_name = models.ForeignKey(iPhone, on_delete=models.CASCADE, max_length=250)
-    memory_info = models.ForeignKey(Memory, on_delete=models.CASCADE, help_text='Выберите память')
-    colors_name = models.ForeignKey(AllColors, on_delete=models.CASCADE, help_text="Выберите цвет")
-    region_name = models.ForeignKey(Region, on_delete=models.CASCADE, max_length=100, null=True)
+class UsedIPhones(models.Model):
+    name_iphone = models.ForeignKey(to=Phone, on_delete=models.CASCADE, max_length=250)
+    memory_info = models.ManyToManyField(Memory, help_text='Выберите память')
+    colors_name = models.ManyToManyField(AllColors, help_text="Выберите цвет")
+    region_name = models.ManyToManyField(Region, max_length=100)
     photo_phone = models.ImageField(upload_to='photos_used/%Y/%m/%d', blank=True)
     about_phone = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -196,7 +208,7 @@ class UsedPhones(models.Model):
     availability_phone = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.iphone_name}' \
+        return f'{self.name_iphone}' \
                f'{self.memory_info}' \
                f'{self.colors_name}' \
                f'{self.region_name}' \
@@ -204,22 +216,21 @@ class UsedPhones(models.Model):
                f'{self.about_phone}'
 
     class Meta:
-        verbose_name = 'Б/У Аппараты'
-        verbose_name_plural = 'Б/У Аппараты'
-        # ordering = ['-serial_phone']
+        verbose_name = 'Б/У iPhone'
+        verbose_name_plural = 'Б/У iPhone'
+        ordering = ['-name_iphone']
 
 
+#
 class NewMacBook(models.Model):
-    macbook_model = models.ForeignKey(MacBook, on_delete=models.CASCADE, max_length=150, null=True,
+    model_macbook = models.ForeignKey(MacBook, on_delete=models.CASCADE, max_length=150, null=True,
                                       verbose_name='Модель')
     years_macbook = models.CharField(max_length=100, null=True, verbose_name='Год')
-    mac_color = models.ForeignKey(AllColors, on_delete=models.CASCADE, help_text="Выберите цвет",
-                                  verbose_name='Цвет')
-    mac_memory = models.ForeignKey(Memory, on_delete=models.CASCADE, help_text='Выберите память',
-                                   verbose_name='Память')
-    mac_region = models.ForeignKey(Region, on_delete=models.CASCADE, max_length=100, null=True, verbose_name='Страна')
-    operating_system = models.ForeignKey(OperatingSystem, on_delete=models.CASCADE, max_length=250, null=True,
-                                         verbose_name='Оперционная система')
+    mac_color = models.ManyToManyField(AllColors, help_text="Выберите цвет", verbose_name='Цвет')
+    mac_memory = models.ManyToManyField(Memory, help_text='Выберите память', verbose_name='Память')
+    mac_region = models.ManyToManyField(Region, max_length=100, verbose_name='Страна')
+    operating_system = models.ManyToManyField(OperatingSystem, max_length=250,
+                                              verbose_name='Оперционная система')
     photo_phone = models.ImageField(upload_to='photos_imac/%Y/%m/%d', blank=True, verbose_name='Фото')
     retina_lcd = models.BooleanField(default=True, null=True, verbose_name='Ретина')
     diagonal = models.CharField(max_length=150, null=True, verbose_name='Диагональ', blank=True)
@@ -230,7 +241,7 @@ class NewMacBook(models.Model):
     update_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.macbook_model}' \
+        return f'{self.model_macbook}' \
                f'{self.diagonal}' \
                f' {self.years_macbook}' \
                f' {self.chip}' \
@@ -242,9 +253,9 @@ class NewMacBook(models.Model):
                f'{self.created_at}'
 
     class Meta:
-        verbose_name = 'Новые MacBook'
+        verbose_name = 'Новый MacBook'
         verbose_name_plural = 'Новые MacBook'
-        ordering = ['-macbook_model']
+        ordering = ['-model_macbook']
 
     '''def save(self, *args, **kwargs):
         self.last_updated_dt = datetime.now()
@@ -262,3 +273,4 @@ class NewMacBook(models.Model):
 # get_region.short_description = 'Регион'
 # python3 manage.py shell_plus --print-sql
 # urls.py
+# Create your models here.

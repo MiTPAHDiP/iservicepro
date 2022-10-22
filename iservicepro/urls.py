@@ -17,13 +17,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-
-
+from user import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('siteservice.urls')),
-    path('bot/', include('tgbot.urls')),
+    #path('register/', views.register, name='register'),
+    #path('register/', views.register, name='register'),
+    #path('info/', include('tgbot.urls')),
 
 ]
 # urls.py

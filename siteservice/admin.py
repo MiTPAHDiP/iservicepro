@@ -1,8 +1,11 @@
 from django.contrib import admin
 
 # Register your models here.
-from siteservice.forms import ProfileForm
-from siteservice.models import Memory, AllColors, iPhone, Phone, MacBook, iMac, OperatingSystem, Region, NewMacBook
+from django.contrib.admin.views.main import ChangeList
+
+from siteservice.models import Memory, \
+    AllColors, Phone, NewiPhone, MacBook, \
+    Imac, OperatingSystem, Region, NewMacBook, UsedIPhones
 
 
 def not_available(modeladmin, request, queryset):
@@ -19,43 +22,50 @@ def available(modeladmin, request, queryset):
 available.short_description = "В наличии"
 
 
-# Define the admin class
-# @admin.register(Iphone)
+# Модель моделей айфон
 class PhoneAdmin(admin.ModelAdmin):
-    list_display = (
-        'model_phone', 'memory_phone', 'colors_phone',
-        'region_phone', 'price_phone',
-        'new_or_used', 'created_at', 'status',)
+    # list_display = [field.name for field in Phone._meta.get_fields() if not field.many_to_many]
+    list_display = ['phone_name']
+
+    #     'new_or_used', 'created_at', 'status',)
 
     # list_select_related = (
     #     'model_phone', 'memory_phone', 'colors_phone',
     #     'region_phone', 'price_phone',
     #     'new_or_used', 'created_at', 'status',)
 
-    search_fields = ('model_phone', 'memory_phone', 'colors_phone',)
-    # form = ProfileForm
-    list_filter = ('model_phone', 'memory_phone', 'colors_phone',)
-    actions = [not_available, available]
+    search_fields = ('phone_name',)
+    # # form = ProfileForm
+    # list_filter = ('model_phone', 'memory_phone', 'colors_phone',)
+    # actions = [not_available, available]
+
+
+# Модель новых айфон
+class iPhoneAdmin(admin.ModelAdmin):
+    list_display = ['model_phone',
+                    'get_memory',
+                    'get_colors',
+                    'get_region',
+                    'price_phone',
+                    'created_at',
+                    'status',
+                    'new_or_used']
+
+    search_fields = ['model_phone']
 
 
 class NewMacBookAdmin(admin.ModelAdmin):
-    list_display = (
-        'macbook_model', 'diagonal',
-        'years_macbook', 'chip',
-        'mac_memory', 'mac_color',
-        'mac_region', 'created_at', 'availability_mac',)
+    ...
+    # list_display = (
+    #     'macbook_model', 'diagonal',
+    #     'years_macbook', 'chip',
+    #     'mac_memory', 'mac_color',
+    #     'mac_region', 'created_at', 'availability_mac',)
     # list_select_related = (
     #     'macbook_model', 'diagonal',
     #     'years_macbook', 'chip',
     #     'mac_memory', 'mac_color',
     #     'mac_region', 'availability_mac',)
-
-
-# @admin.register(Apple)
-class iPhoneAdmin(admin.ModelAdmin):
-    list_display = ('iphone_name',)
-    search_fields = ('iphone_name',)
-    #list_select_related = ('model_phone',)
 
 
 #
@@ -70,12 +80,12 @@ class AllColorsAdmin(admin.ModelAdmin):
     pass
 
 
-# @admin.register(UsedPhones)
-# class UsedAdmin(admin.ModelAdmin):
-#     pass
+@admin.register(UsedIPhones)
+class UsedAdmin(admin.ModelAdmin):
+    pass
 
 
-@admin.register(iMac)
+@admin.register(Imac)
 class iMacAdmin(admin.ModelAdmin):
     pass
 
@@ -96,7 +106,7 @@ class RegionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Phone, PhoneAdmin)
-admin.site.register(iPhone, iPhoneAdmin)
+admin.site.register(NewiPhone, iPhoneAdmin)
 admin.site.register(NewMacBook, NewMacBookAdmin)
 
 '''class categories(admin.ModelAdmin):

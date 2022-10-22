@@ -5,6 +5,8 @@ class TgbotConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'tgbot'
 
+
+
     # def ready(self) -> None:
     #     import os
     #     from tgbot.management.commands import bot

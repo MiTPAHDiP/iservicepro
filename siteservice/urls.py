@@ -6,5 +6,4 @@ from siteservice.views import index
 urlpatterns = [
     path('', index),
 
-
 ]
