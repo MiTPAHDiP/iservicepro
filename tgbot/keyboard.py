@@ -4,7 +4,7 @@ from telebot.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardBut
 from siteservice import models
 
 # btn_folower = KeyboardButton('Подписка')
-from siteservice.models import Phone
+
 
 button1 = KeyboardButton('Ремонт ')
 button2 = KeyboardButton('Покупка')
@@ -36,7 +36,7 @@ inline_kb_sale_menu = InlineKeyboardMarkup(row_width=2).add(inline_btn_iphone, i
 
 """Инлайн кнопки для меню покупки тел"""
 inline_iphone_14 = InlineKeyboardButton('iPhone 14', callback_data='sale_iphone14')
-inline_iphone_14max = InlineKeyboardButton('iPhone 14 Max', callback_data='sale_iphone14max')
+inline_iphone_14plus = InlineKeyboardButton('iPhone 14 Plus', callback_data='sale_iphone14plus')
 inline_iphone_14pro = InlineKeyboardButton('iPhone 14 Pro', callback_data='sale_iphone14pro')
 inline_iphone_14promax = InlineKeyboardButton('iPhone 14 Pro Max', callback_data='sale_iphone14promax')
 inline_iphone_13 = InlineKeyboardButton('iPhone 13', callback_data='sale_iphone13')
@@ -49,7 +49,21 @@ inline_iphone_12pro = InlineKeyboardButton('iPhone 12 Pro', callback_data='sale_
 inline_iphone_12promax = InlineKeyboardButton('iPhone 12 Pro Max', callback_data='sale_iphone_12promax')
 inline_iphone_12mini = InlineKeyboardButton('iPhone 12 Mini', callback_data='sale_iphone_12mini')
 inline_iphone_11 = InlineKeyboardButton('iPhone 11', callback_data='sale_iphone_11')
-inline_iphone_11pro = InlineKeyboardButton('iPhone 11 Pro', callback_data='sale_iphone11pro')
+inline_kb_chose_new_model_iphone = InlineKeyboardMarkup(row_width=2).add(inline_iphone_14, inline_iphone_14plus,
+                                                                         inline_iphone_14pro, inline_iphone_14promax,
+                                                                         inline_iphone_13, inline_iphone_13pro,
+                                                                         inline_iphone_13promax, inline_iphone_13mini,
+                                                                         inline_iphone_12, inline_iphone_12pro,
+                                                                         inline_iphone_12promax, inline_iphone_12mini,
+                                                                         inline_iphone_11)
+# inline_iphone_11pro, inline_iphone_se2,
+# inline_iphone_11promax,
+# inline_iphone_xs, inline_iphone_se1,
+# inline_iphone_xr, inline_iphone_x,
+# inline_iphone_8, inline_iphone_8plus,
+# inline_iphone_7, inline_iphone_7plus
+
+'''inline_iphone_11pro = InlineKeyboardButton('iPhone 11 Pro', callback_data='sale_iphone11pro')
 inline_iphone_11promax = InlineKeyboardButton('iPhone 11 Pro Max', callback_data='sale_iphone_11promax')
 inline_iphone_xs = InlineKeyboardButton('iPhone XS', callback_data='sale_iphone_xs')
 inline_iphone_xsmax = InlineKeyboardButton('iPhone XS Max', callback_data='sale_iphone_xsmax')
@@ -59,26 +73,7 @@ inline_iphone_8 = InlineKeyboardButton('iPhone 8', callback_data='sale_iphone_8'
 inline_iphone_se1 = InlineKeyboardButton('iPhone SE (1-го поколения)', callback_data='sale_iphone_se1')
 inline_iphone_8plus = InlineKeyboardButton('iPhone 8 Plus', callback_data='sale_iphone_8plus')
 inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-inline_iphone_7plus = InlineKeyboardButton('iPhone 7 Plus', callback_data='sale_iphone_7plus')
-# inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-# inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-# inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-# inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-# inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-# inline_iphone_7 = InlineKeyboardButton('iPhone 7', callback_data='sale_iphone_7')
-inline_kb_chose_new_model_iphone = InlineKeyboardMarkup(row_width=2).add(inline_iphone_14, inline_iphone_14max,
-                                                                         inline_iphone_14pro, inline_iphone_14promax,
-                                                                         inline_iphone_13, inline_iphone_13pro,
-                                                                         inline_iphone_13promax, inline_iphone_13mini,
-                                                                         inline_iphone_12, inline_iphone_12pro,
-                                                                         inline_iphone_12promax, inline_iphone_12mini,
-                                                                         inline_iphone_11, inline_iphone_11,
-                                                                         inline_iphone_11pro, inline_iphone_se2,
-                                                                         inline_iphone_11promax,
-                                                                         inline_iphone_xs, inline_iphone_se1,
-                                                                         inline_iphone_xr, inline_iphone_x,
-                                                                         inline_iphone_8, inline_iphone_8plus,
-                                                                         inline_iphone_7, inline_iphone_7plus)
+inline_iphone_7plus = InlineKeyboardButton('iPhone 7 Plus', callback_data='sale_iphone_7plus')'''
 
 '''model_from_phone = iPhone.objects.all()
 keyb_temp = InlineKeyboardMarkup(row_width=3)
