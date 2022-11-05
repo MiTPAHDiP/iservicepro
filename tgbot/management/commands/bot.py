@@ -5,7 +5,7 @@ from django.conf import settings
 import re
 from telebot import custom_filters
 from telebot.handler_backends import StatesGroup, State
-from siteservice.models import Phone, NewiPhone, AllColors, Memory, Region
+from siteservice.models import Phone, NewiPhone, AllColors, Memory, Region, MacBook
 from tgbot import keyboard as kb
 import environ
 import urllib.request  # request нужен для загрузки файлов от пользователя
@@ -157,241 +157,306 @@ def add_data_in_db(model, memory, color, region, price):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     try:
-        if call.message:
-            if call.data == 'sale_new_iphone':
-                bot.send_message(call.message.chat.id, text="iPhone",
-                                 reply_markup=kb.inline_kb_chose_new_model_iphone)
-            elif call.data == 'sale_iphone14':
-                # select_in_db(call.data, call.message)
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name=f'14')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        if call.data == 'sale_new_iphone':
+            bot.send_message(call.message.chat.id, text="iPhone 📱", reply_markup=kb.inline_kb_chose_new_model_iphone)
+        elif call.data == 'sale_new_macbook':
+            bot.send_message(call.message.chat.id, text="MacBook 💻", reply_markup=kb.inline_mac_menu)
+            # callback_mac_query(call.data, call.message)
+        elif call.data == 'sale_iphone14':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name=f'14')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone14plus':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name=f'14 plus')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone14plus':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name=f'14 plus')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone14pro':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name=f'14 pro')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone14pro':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name=f'14 pro')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone14promax':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name=f'14 pro max')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone14promax':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name=f'14 pro max')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone13':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name=f'13')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, text=f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone13':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name=f'13')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, text=f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone13pro':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='13 pro')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone13pro':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='13 pro')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone13promax':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='13 pro max')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone13promax':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='13 pro max')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone13mini':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='13 mini')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone13mini':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='13 mini')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone_12promax':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='12 pro max')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone_12promax':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='12 pro max')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone_12pro':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='12 pro')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone_12pro':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='12 pro')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone12':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='12')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone12':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='12')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone_12mini':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='12 mini')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+        elif call.data == 'sale_iphone_12mini':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='12 mini')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
 
-                    else:
-                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone_se2':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='SE (2-го поколения)')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️',reply_markup=kb.markup_menu)
+        elif call.data == 'sale_iphone_se2':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='SE (2-го поколения)')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
 
-                    else:
-                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone_11pro':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='11 pro')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️',reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone_11pro':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='11 pro')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone_11promax':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='11 Pro Max')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️',reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
+        elif call.data == 'sale_iphone_11promax':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='11 Pro Max')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
 
-            elif call.data == 'sale_iphone_11':
-                try:
-                    model = NewiPhone.objects.filter(model_phone__name='11')
-                    status = NewiPhone.objects.filter(status='n')
-                    if not model or status:
-                        bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
-                    else:
-                        bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
-                        for item in model:
-                            bot.send_message(call.message.chat.id, f'iPhone {item}')
-                except NewiPhone.DoesNotExist as s:
-                    print(s)
-
-            else:
-                bot.send_message(call.message.chat.id, 'Мы работаем над этим 🤧', reply_markup=kb.markup_menu)
+        elif call.data == 'sale_iphone_11':
+            try:
+                model = NewiPhone.objects.filter(model_phone__name='11')
+                status = NewiPhone.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'iPhone {item}')
+            except NewiPhone.DoesNotExist as s:
+                print(s)
+        elif call.data == 'macbook_air13_22':
+            try:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Air 13 (mid 2022)')
+                status = MacBook.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'{item}')
+            except MacBook.DoesNotExist as s:
+                print(s)
+        elif call.data == 'macbook_pro13_22':
+            try:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 13(mid 2022)')
+                status = MacBook.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'{item}')
+            except MacBook.DoesNotExist as s:
+                print(s)
+        elif call.data == 'macbook_air13_20':
+            try:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Air 13(mid 2020)')
+                status = MacBook.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'{item}')
+            except MacBook.DoesNotExist as s:
+                print(s)
+        elif call.data == 'macbook_pro13_20':
+            try:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 13(mid 2020)')
+                status = MacBook.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'{item}')
+            except MacBook.DoesNotExist as s:
+                print(s)
+        elif call.data == 'macbook_pro14_21':
+            try:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 14(mid 2021)')
+                status = MacBook.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'{item}')
+            except MacBook.DoesNotExist as s:
+                print(s)
+        elif call.data == 'macbook_pro16_21':
+            try:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 16(mid 2021)')
+                status = MacBook.objects.filter(status='n')
+                if not model or status:
+                    bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
+                else:
+                    bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
+                    for item in model:
+                        bot.send_message(call.message.chat.id, f'{item}')
+            except MacBook.DoesNotExist as s:
+                print(s)
+        else:
+            bot.send_message(call.message.chat.id, 'Мы работаем над этим 🤧')
     except Exception as e:
         bot.send_message(call.message.chat.id, 'Упс 🤧 что-то не работает ⚙️')
         print(e)
 
 
-def select_in_db(data, message):
-    if data == 'sale_iphone14':
-        try:
-            model = NewiPhone.objects.filter(model_phone__name=f'14')
-            status = NewiPhone.objects.filter(status='n')
-            if not model or status:
-                return 'Увы! Пока в наличии нет'
-            else:
-                bot.send_message(message.chat.id, '⬇️ Отлично! Отправляю прайс ⬇️')
-                for item in model:
-                    bot.send_message(message.chat.id, text=f'iPhone {item}')
-        except Phone.DoesNotExist as s:
-            print(s)
+def callback_mac_query(data, message):
+    ...
+    # chat_id = message.chat.id
+    # user_message, _ = Profile.objects.get_or_create(external_id=chat_id, defaults={'message': data})
+    # user_id = Message(profile=user_message)
+    # print(user_id)
+    # bot.send_message(data.message.chat.id, text="MacBook", reply_markup=kb.inline_mac_menu)
 
 
 class SearchInDb:

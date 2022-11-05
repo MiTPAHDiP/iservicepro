@@ -47,9 +47,9 @@ class iPhoneAdmin(admin.ModelAdmin):
                     'price_phone',
                     'created_at',
                     'status',
-                    'new_or_used']
+                    'activ_or_not']
 
-    search_fields = ['model_phone__name']
+    search_fields = ['model_phone__name', 'memory_phone__memory', 'colors_phone__colors', 'price_phone']
     actions = [not_available, available]
 
 
@@ -65,26 +65,26 @@ class RegionAdmin(admin.ModelAdmin):
     ...
 
 
-@admin.register(MacBook)
-class RegionAdmin(admin.ModelAdmin):
-    ...
-
-
 @admin.register(ModelMacBook)
-class AllModelMacBookAdmin(admin.ModelAdmin):
-    list_display = ['model']
+class ModelMacBookAdmin(admin.ModelAdmin):
+    list_display = ['macbook_name']
     actions = [not_available, available]
 
-        # 'model', 'diagonal',
-        # 'years_macbook', 'chip',
-        # 'mac_memory', 'mac_color',
-        # 'mac_region', 'created_at', 'availability_mac',)
+    # 'model', 'diagonal',
+    # 'years_macbook', 'chip',
+    # 'mac_memory', 'mac_color',
+    # 'mac_region', 'created_at', 'availability_mac',)
     # list_select_related = (
     #     'macbook_model', 'diagonal',
     #     'years_macbook', 'chip',
     #     'mac_memory', 'mac_color',
     #     'mac_region', 'availability_mac',)
-    pass
+
+
+@admin.register(MacBook)
+class MacBookAdmin(admin.ModelAdmin):
+    list_display = ['model', 'years', 'mac_color', 'mac_memory', 'ram', 'mac_region', 'price_mac']
+    actions = [not_available, available]
 
 
 admin.site.register(Phone, PhoneAdmin)

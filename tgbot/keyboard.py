@@ -56,12 +56,15 @@ inline_kb_chose_new_model_iphone = InlineKeyboardMarkup(row_width=2).add(inline_
                                                                          inline_iphone_12, inline_iphone_12pro,
                                                                          inline_iphone_12promax, inline_iphone_12mini,
                                                                          inline_iphone_11)
-# inline_iphone_11pro, inline_iphone_se2,
-# inline_iphone_11promax,
-# inline_iphone_xs, inline_iphone_se1,
-# inline_iphone_xr, inline_iphone_x,
-# inline_iphone_8, inline_iphone_8plus,
-# inline_iphone_7, inline_iphone_7plus
+
+inline_mac_air13_22 = InlineKeyboardButton('MacBook Air 13(mid 2022)', callback_data='macbook_air13_22')
+inline_mac_pro13_22 = InlineKeyboardButton('MacBook Pro 13(mid 2022)', callback_data='macbook_pro13_22')
+inline_mac_air13_20 = InlineKeyboardButton('MacBook Air 13(mid 2020)', callback_data='macbook_air13_20')
+inline_mac_pro13_20 = InlineKeyboardButton('MacBook Pro 13(mid 2020)', callback_data='macbook_pro13_20')
+inline_mac_pro14_21 = InlineKeyboardButton('MacBook Pro 14(mid 2021)', callback_data='macbook_pro14_21')
+inline_mac_pro16_21 = InlineKeyboardButton('MacBook Pro 16(mid 2021)', callback_data='macbook_pro16_21')
+inline_mac_menu = InlineKeyboardMarkup(row_width=1).add(inline_mac_air13_22, inline_mac_pro13_22, inline_mac_air13_20,
+                                                        inline_mac_pro13_20, inline_mac_pro14_21,inline_mac_pro16_21)
 
 '''inline_iphone_11pro = InlineKeyboardButton('iPhone 11 Pro', callback_data='sale_iphone11pro')
 inline_iphone_11promax = InlineKeyboardButton('iPhone 11 Pro Max', callback_data='sale_iphone_11promax')

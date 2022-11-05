@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'siteservice.apps.SiteserviceConfig',
     'tgbot.apps.TgbotConfig',
+    'rest_framework',
 
 
 ]
