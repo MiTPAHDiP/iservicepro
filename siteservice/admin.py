@@ -7,17 +7,38 @@ from siteservice.models import Phone, NewiPhone, MacBook, ModelMacBook, Memory, 
 
 
 def not_available(modeladmin, request, queryset):
-    queryset.update(status='n')
+    queryset.update(status='not_available')
 
 
 not_available.short_description = "Нет в наличии"
 
 
 def available(modeladmin, request, queryset):
-    queryset.update(status='y', )
+    queryset.update(status='available', )
 
 
 available.short_description = "В наличии"
+
+
+def used(modeladmin, request, queryset):
+    queryset.update(activ_or_not='used')
+
+
+used.short_description = "Б/У"
+
+
+def new(modeladmin, request, queryset):
+    queryset.update(activ_or_not='new')
+
+
+new.short_description = "Новый"
+
+
+def activ(modeladmin, request, queryset):
+    queryset.update(activ_or_not='activ')
+
+
+activ.short_description = "Активирован"
 
 
 # Модель моделей айфон
@@ -50,7 +71,7 @@ class iPhoneAdmin(admin.ModelAdmin):
                     'activ_or_not']
 
     search_fields = ['model_phone__name', 'memory_phone__memory', 'colors_phone__colors', 'price_phone']
-    actions = [not_available, available]
+    actions = [not_available, available, new, used, activ, ]
 
 
 class MemoryAdmin(admin.ModelAdmin):

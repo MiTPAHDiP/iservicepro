@@ -8,13 +8,13 @@ from django.db import models
 from django.urls import reverse
 
 STATUS_CHOICES = [
-    ('y', 'В наличии'),
-    ('n', 'Нет в наличии')]
+    ('available', 'В наличии'),
+    ('not_available', 'Нет в наличии')]
 
 ACT_OR_NOT_CHOICES = [
-    ('a', 'Предактив'),
-    ('n', 'Новый'),
-    ('u', 'Б/У')]
+    ('activ', 'Предактив'),
+    ('new', 'Новый'),
+    ('used', 'Б/У')]
 
 
 # ('w', 'Withdrawn'),
@@ -106,6 +106,34 @@ class iMacModels(models.Model):
         verbose_name_plural = 'iMac'
 
 
+class NewIphoneQuereset(models.QuerySet):
+    def available(self):
+        return self.filter(status='available')
+
+    def not_available(self):
+        return self.filter(status='not_available')
+
+
+class NewIphoneManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status='available')
+
+    def used(self):
+        return self.get_queryset().filter(activ_or_not='used')
+
+    def new(self):
+        return self.get_queryset().filter(activ_or_not='new')
+
+    def activ(self):
+        return self.get_queryset().filter(activ_or_not='activ')
+
+    def available(self):
+        return self.get_queryset().available()
+
+    def not_available(self):
+        return self.get_queryset().not_available()
+
+
 class NewiPhone(models.Model):
     model_phone = models.ForeignKey(Phone, on_delete=models.CASCADE, help_text='Выберите модель', verbose_name='Модель')
     memory_phone = models.ForeignKey(Memory, on_delete=models.PROTECT, help_text="Выберите память",
@@ -118,9 +146,12 @@ class NewiPhone(models.Model):
     photo_phone = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, verbose_name='Фото файлы')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     update_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='n', blank=True)
-    activ_or_not = models.CharField(max_length=10, choices=ACT_OR_NOT_CHOICES, default='Не актив', blank=True,
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='available', blank=True)
+    activ_or_not = models.CharField(max_length=15, choices=ACT_OR_NOT_CHOICES, default='new', blank=True,
                                     verbose_name='Новый или актив')
+    objects = models.Manager()
+    status_object = NewIphoneManager()
+    #objects = NewIphoneQuereset.as_manaager()
 
     def __str__(self):
         """
@@ -152,8 +183,8 @@ class MacBook(models.Model):
     diagonal = models.CharField(max_length=150, null=True, verbose_name='Диагональ', blank=True)
     description = models.CharField(max_length=255, null=True, blank=True, verbose_name='Комментарии')
     chip = models.CharField(max_length=100, null=True, verbose_name='Процессор')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='n', blank=True)
-    activ_or_not = models.CharField(max_length=10, choices=ACT_OR_NOT_CHOICES, default='Не актив', blank=True,
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='available', blank=True)
+    activ_or_not = models.CharField(max_length=15, choices=ACT_OR_NOT_CHOICES, default='new', blank=True,
                                     verbose_name='Новый или актив')
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
@@ -192,9 +223,9 @@ class iMac(models.Model):
     diagonal = models.CharField(max_length=150, null=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     chip = models.CharField(max_length=100, null=True)
-    activ_or_not = models.CharField(max_length=10, choices=ACT_OR_NOT_CHOICES, default='Не актив', blank=True,
+    activ_or_not = models.CharField(max_length=15, choices=ACT_OR_NOT_CHOICES, default='new', blank=True,
                                     verbose_name='Новый или актив')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='В наличии', blank=True)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='available', blank=True)
 
     def __str__(self):
         return self.model_imac

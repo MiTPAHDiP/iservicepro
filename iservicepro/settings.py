@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'siteservice.apps.SiteserviceConfig',
     'tgbot.apps.TgbotConfig',
     'rest_framework',
-
+    'django_extensions',
 
 ]
 

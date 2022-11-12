@@ -165,8 +165,9 @@ def create_price(count=3000):
                     price = int(phone_data[4]) + count
                     region = phone_data[3][-2:]
                     add_data_in_db(model, memory, color, region, price)
-            except ValueError:
-                if_error()
+            except ValueError as va:
+                print(va)
+    s.close()
 
 
 def add_data_in_db(model, memory, color, region, price):
@@ -175,8 +176,9 @@ def add_data_in_db(model, memory, color, region, price):
         m, _ = Memory.objects.get_or_create(memory=memory)
         c, _ = AllColors.objects.get_or_create(colors=color)
         r, _ = Region.objects.get_or_create(regions=region)
-        new = NewiPhone(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r, price_phone=price, status='y')
+        new = NewiPhone(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r, price_phone=price)
         new.save()
+
     except Phone.DoesNotExist as m:
         error_message = f'Произошла ошибка: {m}'
         print(error_message)
@@ -190,10 +192,9 @@ def callback_query(call):
             bot.send_message(call.message.chat.id, text="iPhone 📱", reply_markup=kb.inline_kb_chose_new_model_iphone)
         elif call.data == 'sale_new_macbook':
             bot.send_message(call.message.chat.id, text="MacBook 💻", reply_markup=kb.inline_mac_menu)
-            # callback_mac_query(call.data, call.message)
         elif call.data == 'sale_iphone14':
             try:
-                model = NewiPhone.objects.filter(model_phone__name=f'14').exclude(status='n')
+                model = NewiPhone.objects.filter(model_phone__name=f'14').exclude(status='not')
                 if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
@@ -205,7 +206,7 @@ def callback_query(call):
 
         elif call.data == 'sale_iphone14plus':
             try:
-                model = NewiPhone.objects.filter(model_phone__name=f'14 plus').exclude(status='n')
+                model = NewiPhone.objects.filter(model_phone__name=f'14 plus').exclude(status='not')
                 if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
@@ -385,9 +386,8 @@ def callback_query(call):
                 print(s)
         elif call.data == 'macbook_air13_22':
             try:
-                model = MacBook.objects.filter(model__macbook_name='MacBook Air 13 (mid 2022)')
-                status = MacBook.objects.filter(status='n')
-                if not model or status:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Air 13 (mid 2022)').exclude(status='n')
+                if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
                     bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -397,9 +397,8 @@ def callback_query(call):
                 print(s)
         elif call.data == 'macbook_pro13_22':
             try:
-                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 13(mid 2022)')
-                status = MacBook.objects.filter(status='n')
-                if not model or status:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 13(mid 2022)').exclude(status='n')
+                if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
                     bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -409,9 +408,8 @@ def callback_query(call):
                 print(s)
         elif call.data == 'macbook_air13_20':
             try:
-                model = MacBook.objects.filter(model__macbook_name='MacBook Air 13(mid 2020)')
-                status = MacBook.objects.filter(status='n')
-                if not model or status:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Air 13(mid 2020)').exclude(status='n')
+                if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
                     bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -421,9 +419,8 @@ def callback_query(call):
                 print(s)
         elif call.data == 'macbook_pro13_20':
             try:
-                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 13(mid 2020)')
-                status = MacBook.objects.filter(status='n')
-                if not model or status:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 13(mid 2020)').exclude(status='n')
+                if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
                     bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -433,9 +430,8 @@ def callback_query(call):
                 print(s)
         elif call.data == 'macbook_pro14_21':
             try:
-                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 14(mid 2021)')
-                status = MacBook.objects.filter(status='n')
-                if not model or status:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 14(mid 2021)').exclude(status='n')
+                if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
                     bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -445,9 +441,8 @@ def callback_query(call):
                 print(s)
         elif call.data == 'macbook_pro16_21':
             try:
-                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 16(mid 2021)')
-                status = MacBook.objects.filter(status='n')
-                if not model or status:
+                model = MacBook.objects.filter(model__macbook_name='MacBook Pro 16(mid 2021)').exclude(status='n')
+                if not model:
                     bot.send_message(call.message.chat.id, 'Увы! Пока в наличии нет ☹️', reply_markup=kb.markup_menu)
                 else:
                     bot.send_message(call.message.chat.id, 'Отлично! Отправляю прайс')
@@ -529,13 +524,14 @@ def send_time_namaz():
 
 def main():
     try:
-        start = bot.polling(none_stop=True, timeout=123, interval=1)
+        bot.polling(none_stop=True, timeout=123, interval=1)
         while True:
             schedule.run_pending()
             time.sleep(10)
     except Exception as e:
         print(f'Error {e}')
-    return start
+    except UnboundLocalError as connect:
+        return main
 
 
 bot.add_custom_filter(custom_filters.StateFilter(bot))

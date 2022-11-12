@@ -136,8 +136,8 @@ def create_price(count=3000):
                     price = int(phone_data[4]) + count
                     region = phone_data[3][-2:]
                     add_data_in_db(model, memory, color, region, price)
-            except ValueError:
-                if_error()
+            except ValueError as v:
+                print(v)
 
 
 def add_data_in_db(model, memory, color, region, price):
@@ -146,8 +146,15 @@ def add_data_in_db(model, memory, color, region, price):
         m, _ = Memory.objects.get_or_create(memory=memory)
         c, _ = AllColors.objects.get_or_create(colors=color)
         r, _ = Region.objects.get_or_create(regions=region)
-        new = NewiPhone(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r, price_phone=price)
-        new.save()
+        data, _ = NewiPhone.objects.filter(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r,
+                                           price_phone=price)
+        if data.exists():
+            print(f'Уже есть в БД {data}')
+        else:
+            print(f'Нету данных')
+            new = NewiPhone(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r, price_phone=price)
+            new.save()
+
     except Phone.DoesNotExist as m:
         error_message = f'Произошла ошибка: {m}'
         print(error_message)
