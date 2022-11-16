@@ -18,13 +18,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from siteservice.views import NewPhoneSetView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('siteservice.urls')),
-    #path('register/', views.register, name='register'),
-    #path('register/', views.register, name='register'),
-    #path('info/', include('tgbot.urls')),
+    path('api/v1/newphonelist', NewPhoneSetView.as_view()),
+
 
 ]
 # urls.py

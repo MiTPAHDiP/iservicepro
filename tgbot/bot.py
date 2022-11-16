@@ -120,10 +120,12 @@ def name_get(message):
         write_data(data['price'])
         # print(data['price'])
     bot.delete_state(message.from_user.id, message.chat.id)
-    bot.send_message(message.chat.id, 'Отправлено', reply_markup=kb.markup_menu)
-    # msg = ("Все верно?:\n<b>"
-    #        f"{data['price']}\n</b>")
-    # bot.send_message(message.chat.id, msg, parse_mode="html")
+    send_ok(message)
+
+
+def send_ok(message):
+    answer = bot.send_message(message.chat.id, 'Отправлено', reply_markup=kb.markup_menu)
+    return answer
 
 
 def write_data(data, filename='price.txt'):
@@ -165,9 +167,8 @@ def create_price(count=3000):
                     price = int(phone_data[4]) + count
                     region = phone_data[3][-2:]
                     add_data_in_db(model, memory, color, region, price)
-            except ValueError as va:
-                print(va)
-    s.close()
+            except ValueError as v:
+                print(v)
 
 
 def add_data_in_db(model, memory, color, region, price):
@@ -176,13 +177,26 @@ def add_data_in_db(model, memory, color, region, price):
         m, _ = Memory.objects.get_or_create(memory=memory)
         c, _ = AllColors.objects.get_or_create(colors=color)
         r, _ = Region.objects.get_or_create(regions=region)
-        new = NewiPhone(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r, price_phone=price)
-        new.save()
+        data = NewiPhone.objects.filter(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r).exists()
+        if data:
+            print(f"в наборе есть объекты {data}")
+            data = NewiPhone.objects.filter(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r).update(
+                price_phone=price)
+
+        else:
+            print(f'Нет данных {data}')
+            new = NewiPhone(model_phone=p, memory_phone=m, colors_phone=c, region_phone=r, price_phone=price)
+            new.save()
 
     except Phone.DoesNotExist as m:
         error_message = f'Произошла ошибка: {m}'
         print(error_message)
         raise m
+
+
+def if_error(message):
+    error_msg = bot.send_message(message.chat.id, 'Что-то пошло не так', reply_markup=kb.markup_menu)
+    return error_msg
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -523,43 +537,18 @@ def send_time_namaz():
 
 
 def main():
-    try:
-        bot.polling(none_stop=True, timeout=123, interval=1)
-        while True:
-            schedule.run_pending()
-            time.sleep(10)
-    except Exception as e:
-        print(f'Error {e}')
-    except UnboundLocalError as connect:
-        return main
+    while True:
+        try:
+            bot.polling(none_stop=True)
+        except Exception as e:
+            time.sleep(3)
+            print(e)
 
 
 bot.add_custom_filter(custom_filters.StateFilter(bot))
 
-
-class Command(BaseCommand):
-    help = 'Телеграм-бот'
-
-    def handle(self, *args, **options):
-        try:
-            bot.polling(none_stop=True, timeout=123, interval=1)
-
-        except Exception as e:
-            print(f'Error {e}')
-
-
 if __name__ == '__main__':
     main()
-
-#
-# class Command(BaseCommand):
-#     help = 'Телеграм-бот'
-#
-#     def handle(self, *args, **options):
-#         try:
-#             bot.polling(none_stop=True, timeout=123, interval=1)
-#         except Exception as e:
-#             print(f'Error {e}')
 
 # __gt для сравнений если больше
 # __ls если меньше
@@ -573,3 +562,17 @@ if __name__ == '__main__':
 # schedule.every().wednesday.at("13:15").do(job)
 # schedule.every().minute.at(":17").do(job)
 # нужно иметь свой цикл для запуска планировщика с периодом в 1 секунду:
+# for object in data:
+#     object.save(update_fields=["price_phone"])
+#     print(object)
+
+# def main():
+#     try:
+#         bot.polling(none_stop=True, timeout=123, interval=1)
+#         while True:
+#             schedule.run_pending()
+#             time.sleep(10)
+#     except Exception as e:
+#         print(f'Error {e}')
+#     except UnboundLocalError as connect:
+#         return main

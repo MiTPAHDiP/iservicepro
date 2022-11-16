@@ -155,6 +155,7 @@ MEDIA_URL = '/media/'
 
 # Настройки бота
 TOKEN = env('TOKEN')
+TOKEN_PAR = env('TOKEN_PAR')
 proxy = env('proxy')
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
